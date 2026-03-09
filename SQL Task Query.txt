@@ -1,0 +1,176 @@
+Create database IMDB;
+use IMDB;
+-- Creating Movie Table
+Create table Movie ( movie_id int auto_increment primary key,
+Title varchar(100), Release_year int);
+
+Insert into Movie values (1,'Roja', 1992); 
+Insert into Movie (Title, Release_year) values (96, 2018);
+
+-- Creating Media Table
+create table Media (media_id int auto_increment primary key,
+movie_id int,
+Media_type Enum('Video', 'Image') NOT null, 
+url varchar (300) not null,
+foreign key (movie_id) references Movie(movie_id)
+);
+
+-- Insert
+INSERT INTO Media (movie_id, media_type, url) VALUES
+(1, 'video', 'Roja_Trailer.mp4'),
+(1, 'image', 'Roja_jpg'),
+(2, 'video', '96_movie.mp4');
+
+
+
+-- Creating Genre Table
+create table Genre (genre_id int auto_increment primary key,
+name varchar (50) not null);
+
+-- Insert
+Insert into Genre (name) values ('Love'), ('Drama'), ('Action');
+
+-- Creating Movie_Genre table
+create table Movie_Genre (movie_id int,
+genre_id int,
+primary key (movie_id, genre_id),
+foreign key (movie_id) references Movie(movie_id),
+foreign key (genre_id) references Genre(genre_id) );
+
+-- Insert
+Insert into Movie_Genre values (1,1), (2,2);
+Insert into Movie_Genre values (1,2), (2,1);
+
+-- Creating user table
+create table User(
+user_id int auto_increment primary key,
+user_name varchar(30) not null);
+
+-- insert 
+Insert into user (user_name) Values ('GP'), ('Prakash'), ('Risha'); 
+
+
+-- Creating Review Table
+create table Review(
+Review_id int auto_increment primary key,
+movie_id int,
+user_id int,
+rating int check(rating between 1 and 10),
+comment text,
+foreign key (movie_id) references Movie(movie_id),
+foreign key (user_id) references User(user_id)
+);
+
+-- Insert
+Insert into Review values (1,1,2,9,'Best Story with best Music'),
+(2,2,3,8,'Good Reunion and love');
+
+Insert into Review values (3,1,3,8,'Good movie with good story');
+
+
+-- Creating Artist Table
+create table Artist( Artist_id int auto_increment primary key,
+Artist_name varchar (40) not null );
+
+-- Insert
+Insert into Artist (Artist_name) values ('Aravind Swamy'), ('VJS'), ('Trisha'), ('AR Rahman'), ('Manirathnam');
+
+-- Creating Skill table
+Create table Skill (Skill_id int auto_increment primary key,
+skill_name varchar (20) not null );
+
+
+-- Insert
+Insert into Skill (skill_name) values ('Acting'), ('Direction'), ('Music');
+
+-- Creating Artist_skills table
+create table Artist_Skills (artist_id int,
+skill_id int,
+primary key(artist_id, skill_id),
+foreign key (artist_id) references Artist(artist_id),
+foreign key (skill_id) references Skill(skill_id)
+);
+
+-- Insert
+Insert into Artist_skills values (1,1), (2,1), (3,1), (5,2), (4,3);
+Insert into Artist_skills values (1,2),(3,3),(2,3),(5,1);
+
+select * from Artist_skills;
+
+-- Creating Roles table
+create table Roles(role_id int auto_increment primary key,
+Role_name varchar(20) not null);
+
+-- Insert
+insert into Roles (Role_name) values ('Hero'),('Heroine'),('Music Director'),('Director');
+
+
+-- Creating Artist_Roles table
+create table Artist_Roles(
+artist_id int,
+movie_id int,
+role_id int,
+primary key(artist_id, movie_id, role_id),
+foreign key (artist_id) references Artist(artist_id),
+foreign key (movie_id) references Movie(movie_id),
+foreign key (role_id) references Roles(role_id));
+
+-- Insert
+insert into Artist_Roles values (1,1,1), (2,2,1), (3,2,2), (4,1,3), (5,1,4);
+insert into Artist_Roles values (1,1,2),(2,2,3),(3,2,1);
+
+-- Select Statement of each table
+Select * from Movie;
+
+Select * from Media;
+
+Select * from Genre;
+
+Select * from Movie_Genre;
+
+Select * from User;
+
+Select * from Review;
+
+Select * from Artist;
+
+Select * from Skill;
+
+Select * from Artist_Skills;
+
+Select * from Roles;
+
+Select * from Artist_Roles;
+
+
+-- Join Query
+select m.Title, m.Release_year, med.media_type,a.artist_name, r.role_name from Movie m 
+inner join Media med on med.movie_id = m.movie_id
+inner join Artist_roles ar on ar.movie_id = m.movie_id
+inner join Artist a on a.artist_id = ar.artist_id
+inner join Roles r on r.role_id = ar.role_id;
+
+-- Movie should have multiple media(video or image)
+select m.Title, m.Release_year,md.Media_type, md.url from Movie m 
+join media md on md.movie_id = m.movie_id;
+
+-- Movie can belongs to Multiple Genre
+select m.title,g.name from Movie m
+join movie_genre mg on m.movie_id = mg.movie_id
+join Genre g on g.genre_id = mg.genre_id;
+
+-- Movie can have multiple reviews and Review can belongs to user
+select m.title, m.Release_year,u.user_name, r.rating, r.comment from movie m
+inner join review r on r.movie_id
+inner join user u on u.user_id = r.user_id;
+
+-- Artist can have multiple skills
+select a.Artist_name,s.skill_name from Artist_skills artskil
+join Artist a on a.artist_id = artskil.artist_id
+join skill s on s.skill_id = artskil.skill_id;
+
+-- Artist can perform multiple role in single film
+select m.title,a.artist_name,r.Role_name from Artist_roles ar
+join movie m on m.movie_id = ar.movie_id
+join roles r on r.role_id = ar.role_id
+join artist a on a.artist_id = ar.artist_id;
